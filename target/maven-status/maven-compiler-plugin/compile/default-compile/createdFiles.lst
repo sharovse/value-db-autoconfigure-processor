@@ -1,6 +1,0 @@
-ru/sharovse/spring/utils/db/values/ValueDbConstants.class
-ru/sharovse/spring/utils/db/values/annotations/ValueDbDataSourceBean.class
-ru/sharovse/spring/utils/db/values/ValueDbAutoConfiguration.class
-ru/sharovse/spring/utils/db/values/annotations/ValueDb.class
-ru/sharovse/spring/utils/db/values/ValueDbAnnotationBeanPostProcessor.class
-ru/sharovse/spring/utils/db/values/exceptions/DataSourceNotFoundException.class

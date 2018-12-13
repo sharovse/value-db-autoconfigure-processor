@@ -82,8 +82,6 @@
 			<scope>test</scope>
 			<version>1.10.19</version>
 		</dependency>
-
-
 	</dependencies>
 
 	<distributionManagement>

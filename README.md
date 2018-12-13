@@ -1,7 +1,7 @@
 # Value-db-autoconfigure-processor
 Append to Spring Autowired @ValueDb Annotation
 
-h2 Example 1,
+## Example 1,
 
 Java class:
 
@@ -9,8 +9,9 @@ Java class:
 	@ValueDb(dataSourceAnnotation=DATASOURCE_NAME,
 			valueSql="select VALUE from AP_USERSETTING where CODE='SERVICE_ID'")
 	private String dbValue;
-	
+
 application.properties:
+
 	dev.datasource.driverClassName=org.hsqldb.jdbcDriver
 	dev.datasource.url=jdbc:hsqldb:mem:testdb
 	dev.datasource.username=SA
@@ -18,7 +19,7 @@ application.properties:
 
 **Value dbValue is available @Value Spring-EL.**
 
-h2 Example 2,
+## Example 2,
 
 @Configuration
 Java Class:
@@ -34,11 +35,12 @@ Java Class:
 	@ValueDb(dataSourceBean=DATASOURCE_NAME,
 			valueSql="select VALUE from AP_USERSETTING where CODE='SERVICE_ID'")
 	private String dbValue;
- 
+
 **Value dbValue is not available @Value Spring-EL.**
 
+---
 
-h2 Annotation @ValueDb acceptable for field type:
+## Annotation @ValueDb acceptable for field type:
 
 	* Object.
 	* Array<Object>.
@@ -54,4 +56,3 @@ Example,
 			, valueColumnName = "VALUE"
 			, dataSourceAnnotation=DATASOURCE_NAME)
 	List<String> serviceValueAsColumnValue;
-

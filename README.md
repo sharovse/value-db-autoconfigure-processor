@@ -1,17 +1,14 @@
 # Value-db-autoconfigure-processor
 Append to Spring Autowired @ValueDb Annotation
 
-##Example 1,
+h2 Example 1,
 
 Java class:
-'''java
 
 	@ValueDbDataSourceBean(name=DATASOURCE_NAME, propertyPrefix="dev.datasource")
-	@ValueDb(dataSource***Annotation***=DATASOURCE_NAME,
+	@ValueDb(dataSourceAnnotation=DATASOURCE_NAME,
 			valueSql="select VALUE from AP_USERSETTING where CODE='SERVICE_ID'")
 	private String dbValue;
-
-'''
 	
 application.properties:
 	dev.datasource.driverClassName=org.hsqldb.jdbcDriver
@@ -21,11 +18,10 @@ application.properties:
 
 **Value dbValue is available @Value Spring-EL.**
 
-##Example 2,
+h2 Example 2,
 
 @Configuration
 Java Class:
-'''java
 
   	@ConfigurationProperties(prefix="dev.datasource")
   	@Bean(name=DATASOURCE_NAME)
@@ -33,28 +29,22 @@ Java Class:
   		return new BasicDataSource();
   	}
 
-'''
-
 Java Class:
 
-	@ValueDb(dataSource***Bean***=DATASOURCE_NAME,
+	@ValueDb(dataSourceBean=DATASOURCE_NAME,
 			valueSql="select VALUE from AP_USERSETTING where CODE='SERVICE_ID'")
 	private String dbValue;
  
 **Value dbValue is not available @Value Spring-EL.**
 
 
-##Annotation @ValueDb acceptable for field type:
+h2 Annotation @ValueDb acceptable for field type:
 
-	<li> Object.
-
-	<li> Array<Object>.
-
-	<li> List<Object>.
-
-	<li> Map<Column,Object>.
-
-	<li> List<Column,Object>.
+	* Object.
+	* Array<Object>.
+	* List<Object>.
+	* Map<Column,Object>.
+	* List<Column,Object>.
 
 See example in test file ru.sharovse.spring.utils.db.values.test.ValueDbTest.
 

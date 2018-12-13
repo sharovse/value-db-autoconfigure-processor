@@ -49,6 +49,7 @@ Java Class:
 	* List<Column,Object>.
 
 See example in test file ru.sharovse.spring.utils.db.values.test.ValueDbTest.
+        [a relative link]value-db-autoconfigure-processor/src/test/java/ru/sharovse/spring/utils/db/values/test/ValueDbTest.java 
 
 Example,
 
@@ -56,3 +57,4 @@ Example,
 			, valueColumnName = "VALUE"
 			, dataSourceAnnotation=DATASOURCE_NAME)
 	List<String> serviceValueAsColumnValue;
+

@@ -121,8 +121,8 @@
 					<includes>
 						<include>**/*</include>
 					</includes>
-					<repositoryName>NewLibrary</repositoryName>
-					<repositoryOwner>alexbarchuk</repositoryOwner>
+					<repositoryName>value-db-autoconfigure-processor</repositoryName>
+					<repositoryOwner>sharovse</repositoryOwner>
 				</configuration>
 				<executions>
 					<execution>

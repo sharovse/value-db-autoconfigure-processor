@@ -10,6 +10,11 @@ Java class:
 			valueSql="select VALUE from AP_USERSETTING where CODE='SERVICE_ID'")
 	private String dbValue;
 
+	@ValueDb(dataSourceBean=DATASOURCE_NAME,
+			valueSql="select CODE from AP_USERSETTING where CODE='SERVICE_ID'")
+	private String dbCode;
+
+
 application.properties:
 
 	dev.datasource.driverClassName=org.hsqldb.jdbcDriver
@@ -25,7 +30,7 @@ application.properties:
 Java Class:
 
   	@ConfigurationProperties(prefix="dev.datasource")
-  	@Bean(name=DATASOURCE_NAME)
+  	@Bean(DATASOURCE_NAME)
   	DataSource createDataSource(){
   		return new BasicDataSource();
   	}
@@ -35,6 +40,7 @@ Java Class:
 	@ValueDb(dataSourceBean=DATASOURCE_NAME,
 			valueSql="select VALUE from AP_USERSETTING where CODE='SERVICE_ID'")
 	private String dbValue;
+
 
 **Value dbValue is not available @Value Spring-EL.**
 

@@ -26,6 +26,17 @@ public class ValueDbAnnotationBeanPostProcessorTest {
 	}
 
 	@Test
+	public void testEvaluateProperty() {
+		String value = "value";
+		String var = "var"; 
+		String name = "${"+var+"}";
+		String prefix = "prefix";
+		Mockito.doReturn(value).when(environment).getProperty(Mockito.eq(prefix+ ValueDbConstants.DOT+var));
+		assertEquals(value, service.evaluateProperty(name, prefix));
+	}
+
+	/*
+	@Test
 	public void testOnApplicationEvent() {
 		fail("Not yet implemented");
 	}
@@ -71,15 +82,6 @@ public class ValueDbAnnotationBeanPostProcessorTest {
 	}
 
 
-	@Test
-	public void testEvaluateProperty() {
-		String value = "value";
-		String var = "var"; 
-		String name = "${"+var+"}";
-		String prefix = "prefix";
-		Mockito.doReturn(value).when(environment).getProperty(Mockito.eq(prefix+ ValueDbConstants.DOT+var));
-		assertEquals(value, service.evaluateProperty(name, prefix));
-	}
 
 	@Test
 	public void testGetTemplateAsBeanNameApplicationContextString() {
@@ -115,5 +117,6 @@ public class ValueDbAnnotationBeanPostProcessorTest {
 	public void testPostProcessEnvironment() {
 		fail("Not yet implemented");
 	}
-
+*/
+	
 }

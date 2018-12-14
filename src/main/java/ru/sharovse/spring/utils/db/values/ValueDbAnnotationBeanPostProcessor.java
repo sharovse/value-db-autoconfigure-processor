@@ -40,172 +40,181 @@ import ru.sharovse.spring.utils.db.values.annotations.ValueDb;
 import ru.sharovse.spring.utils.db.values.annotations.ValueDbDataSourceBean;
 import ru.sharovse.spring.utils.db.values.exceptions.DataSourceNotFoundException;
 
-public class ValueDbAnnotationBeanPostProcessor implements BeanPostProcessor, Ordered, ApplicationListener<ContextRefreshedEvent> {
+public class ValueDbAnnotationBeanPostProcessor
+		implements BeanPostProcessor, Ordered, ApplicationListener<ContextRefreshedEvent> {
 
 	private static Logger log = LoggerFactory.getLogger(ValueDbAnnotationBeanPostProcessor.class);
-	
+
 	@Autowired
 	ConfigurableEnvironment environment;
-	
+
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		ApplicationContext context = event.getApplicationContext();
-		StoreItem<Map<String,ValueDb>> item = (String key, Map<String, ValueDb> value) -> {
+		StoreItem<Map<String, ValueDb>> item = (String key, Map<String, ValueDb> value) -> {
 			Object bean = context.getBean(key);
-			for (Entry<String,ValueDb> propInfo  : value.entrySet()) {
+			for (Entry<String, ValueDb> propInfo : value.entrySet()) {
 				try {
 					setValueFromDb(context, bean, propInfo.getKey(), propInfo.getValue());
 				} catch (Exception e) {
-					log.error(ERROR,e);
+					log.error(ERROR, e);
 				}
 			}
 		};
 		storeAnnonatedFields.forEach(item);
 	}
+
 	static final String ERROR = NOT_SET;
-	
+
 	private int order = Ordered.LOWEST_PRECEDENCE;
+
 	@Override
 	public int getOrder() {
 		return order;
 	}
-	
+
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {
 		Class<?> userClass = ClassUtils.getUserClass(bean.getClass());
 		for (Field field : userClass.getDeclaredFields()) {
 			if (field.isAnnotationPresent(ValueDb.class)) {
 				final ValueDb valueDb = field.getAnnotation(ValueDb.class);
-				if(NOT_SET.equals(valueDb.dataSourceAnnotation())){
+				if (NOT_SET.equals(valueDb.dataSourceAnnotation())) {
 					addToValueDbStore(beanName, field.getName(), valueDb);
-				}else{
+				} else {
 					addToInnerValueDbStore(beanName, field.getName(), valueDb);
 				}
 			}
-			if(field.isAnnotationPresent(ValueDbDataSourceBean.class)){
+			if (field.isAnnotationPresent(ValueDbDataSourceBean.class)) {
 				addToValueDbDataSourceStore(field.getAnnotation(ValueDbDataSourceBean.class));
 			}
 		}
 		return bean;
 	}
-	
+
 	StoreValues<ValueDbDataSourceBean> storeAnnonatedDataSource = new StoreValues<>();
+
 	void addToValueDbDataSourceStore(ValueDbDataSourceBean annotation) {
 		StoreValue<ValueDbDataSourceBean> createValue = () -> annotation;
 		storeAnnonatedDataSource.createAndGetValue(annotation.name(), createValue);
 	}
 
-	StoreValues<Map<String,ValueDb>> storeAnnonatedInnerFields = new StoreValues<>();
+	StoreValues<Map<String, ValueDb>> storeAnnonatedInnerFields = new StoreValues<>();
+
 	void addToInnerValueDbStore(String beanName, String name, ValueDb annotation) {
 		addToValueDbStore(beanName, name, annotation, storeAnnonatedInnerFields);
 	}
-	
-	StoreValues<Map<String,ValueDb>> storeAnnonatedFields = new StoreValues<>();
+
+	StoreValues<Map<String, ValueDb>> storeAnnonatedFields = new StoreValues<>();
+
 	void addToValueDbStore(String beanName, String name, ValueDb annotation) {
 		addToValueDbStore(beanName, name, annotation, storeAnnonatedFields);
 	}
-	
-	void addToValueDbStore(String beanName, String name, ValueDb annotation, StoreValues<Map<String,ValueDb>> store) {
-		StoreValue<Map<String,ValueDb>> createValue = HashMap::new;   
+
+	void addToValueDbStore(String beanName, String name, ValueDb annotation, StoreValues<Map<String, ValueDb>> store) {
+		StoreValue<Map<String, ValueDb>> createValue = HashMap::new;
 		store.createAndGetValue(beanName, createValue).put(name, annotation);
 	}
-	
-	String getKeyInAnnonatedFields(String beanName, Field field){
-		return beanName + "." + field.getName(); 
-	}  
+
+	String getKeyInAnnonatedFields(String beanName, Field field) {
+		return beanName + ValueDbConstants.DOT + field.getName();
+	}
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
-		if(storeAnnonatedInnerFields.isContainKey(beanName)){
-			for (Entry<String,ValueDb> propInfo  : storeAnnonatedInnerFields.get(beanName).entrySet()) {
+		if (storeAnnonatedInnerFields.isContainKey(beanName)) {
+			for (Entry<String, ValueDb> propInfo : storeAnnonatedInnerFields.get(beanName).entrySet()) {
 				try {
 					setValueFromDb(null, bean, propInfo.getKey(), propInfo.getValue());
 				} catch (Exception e) {
-					throw new BeanDefinitionStoreException(String.format("Ошибка установки значения для %s", propInfo.getKey()), e);
+					throw new BeanDefinitionStoreException(
+							String.format("Ошибка установки значения для %s", propInfo.getKey()), e);
 				}
 			}
 		}
 		return bean;
 	}
-	
-	
+
 	NamedParameterJdbcTemplate getTemplateAsBeanName(ApplicationContext context, ValueDb annotation) {
-		if(!NOT_SET.equals(annotation.dataSourceAnnotation())){
-			return getTemplateAsInnerBeanName(annotation.dataSourceAnnotation()); 
-		}else{
+		if (NOT_SET.equals(annotation.dataSourceAnnotation()) && NOT_SET.equals(annotation.dataSourceBean())) {
+			throw new BeanDefinitionStoreException(String.format(
+					"Ошибка. Должно быть установлено свойство dataSourceAnnotation или dataSourceBean для %s",
+					annotation.getClass()));
+		}
+		if (!NOT_SET.equals(annotation.dataSourceAnnotation())) {
+			return getTemplateAsInnerBeanName(annotation.dataSourceAnnotation());
+		} else {
 			return getTemplateAsBeanName(context, annotation.dataSourceBean());
 		}
 	}
 
 	@Autowired
 	ConfigurableListableBeanFactory factoryBean;
-	
+
 	StoreValues<DataSource> storeDataSource = new StoreValues<>();
-	
+
 	private DataSource createInnerDataSource(ValueDbDataSourceBean dataSourceAnotation) {
 		StoreValue<DataSource> createValue = () -> {
 			DriverManagerDataSource dataSource = new DriverManagerDataSource();
-			dataSource.setDriverClassName( evaluateProperty(dataSourceAnotation.driverClassName(), dataSourceAnotation.propertyPrefix()) );
-			dataSource.setUrl( evaluateProperty(dataSourceAnotation.url(), dataSourceAnotation.propertyPrefix()));
-			dataSource.setUsername(evaluateProperty(dataSourceAnotation.username(), dataSourceAnotation.propertyPrefix()));
+			dataSource.setDriverClassName(
+					evaluateProperty(dataSourceAnotation.driverClassName(), dataSourceAnotation.propertyPrefix()));
+			dataSource.setUrl(evaluateProperty(dataSourceAnotation.url(), dataSourceAnotation.propertyPrefix()));
+			dataSource.setUsername(
+					evaluateProperty(dataSourceAnotation.username(), dataSourceAnotation.propertyPrefix()));
 			dataSource.setPassword(evaluateProperty(dataSourceAnotation.pw(), dataSourceAnotation.propertyPrefix()));
-			if(dataSourceAnotation.registerToContext()){
+			if (dataSourceAnotation.registerToContext()) {
 				factoryBean.registerSingleton(dataSourceAnotation.name(), dataSource);
 			}
-			if(!NOT_SET.equals(dataSourceAnotation.importSql())) {
+			if (!NOT_SET.equals(dataSourceAnotation.importSql())) {
 				importScript(dataSourceAnotation.importSql(), dataSource);
 			}
 			return dataSource;
 		};
-		
-		return storeDataSource.createAndGetValue(dataSourceAnotation.name(), createValue );
+
+		return storeDataSource.createAndGetValue(dataSourceAnotation.name(), createValue);
 	}
 
 	void importScript(String fileSql, DataSource dataSource) {
-		try(Connection connection = dataSource.getConnection()) {
-			ScriptUtils.executeSqlScript(
-					connection, 
-					new EncodedResource(new ClassPathResource(fileSql)), 
-					false, false,
-					ScriptUtils.DEFAULT_COMMENT_PREFIX,
-					ScriptUtils.DEFAULT_STATEMENT_SEPARATOR,
-					ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER,
-					ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+		try (Connection connection = dataSource.getConnection()) {
+			ScriptUtils.executeSqlScript(connection, new EncodedResource(new ClassPathResource(fileSql)), false, false,
+					ScriptUtils.DEFAULT_COMMENT_PREFIX, ScriptUtils.DEFAULT_STATEMENT_SEPARATOR,
+					ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER, ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 		} catch (Exception e) {
-			log.error(ERROR,e);
+			log.error(ERROR, e);
 		}
 	}
-	
+
 	private Pattern varPattern = Pattern.compile("^\\$\\{(.*)\\}$");
-	String evaluateProperty(String name, String prefix){
+
+	String evaluateProperty(String name, String prefix) {
 		Matcher m = varPattern.matcher(name);
-		if(m.find()){
-			final String prop = prefix + (prefix.equals(NOT_SET)?NOT_SET:ValueDbConstants.DOT) + m.group(1);
-			return  environment.getProperty(prop);
+		if (m.find()) {
+			final String prop = prefix + (prefix.equals(NOT_SET) ? NOT_SET : ValueDbConstants.DOT) + m.group(1);
+			return environment.getProperty(prop);
 		}
 		return name;
 	}
 
 	StoreValues<NamedParameterJdbcTemplate> storeTemplates = new StoreValues<>();
-	
+
 	NamedParameterJdbcTemplate getTemplateAsBeanName(ApplicationContext context, String beanDataSourceName) {
 		final String key = BEAN_PREFIX + beanDataSourceName;
-		StoreValue<NamedParameterJdbcTemplate> createValue = () -> createJdbcTemplate(context, beanDataSourceName); 
+		StoreValue<NamedParameterJdbcTemplate> createValue = () -> createJdbcTemplate(context, beanDataSourceName);
 		return storeTemplates.createAndGetValue(key, createValue);
 	}
 
-	private NamedParameterJdbcTemplate getTemplateAsInnerBeanName(String dataSourceAnnotation) {
+	NamedParameterJdbcTemplate getTemplateAsInnerBeanName(String dataSourceAnnotation) {
 		final String key = INNER_PREFIX + dataSourceAnnotation;
 		StoreValue<NamedParameterJdbcTemplate> createValue = () -> {
-			ValueDbDataSourceBean dataSourceAnotation =  storeAnnonatedDataSource.get(dataSourceAnnotation);
+			ValueDbDataSourceBean dataSourceAnotation = storeAnnonatedDataSource.get(dataSourceAnnotation);
 			return new NamedParameterJdbcTemplate(createInnerDataSource(dataSourceAnotation));
 		};
 		return storeTemplates.createAndGetValue(key, createValue);
 	}
-	
+
 	public static final String BEAN_PREFIX = "bean.";
 	public static final String INNER_PREFIX = "inner.";
-	
+
 	NamedParameterJdbcTemplate createJdbcTemplate(ApplicationContext context, String beanDataSourceName) {
 		try {
 			final DataSource dataSource = context.getBean(beanDataSourceName, DataSource.class);
@@ -220,23 +229,26 @@ public class ValueDbAnnotationBeanPostProcessor implements BeanPostProcessor, Or
 		Map<String, Object> pars = new HashMap<>();
 		pars.put(annotation.argPropertyName(), fieldName);
 		List<Map<String, Object>> list = template.queryForList(annotation.valueSql(), pars);
-		if(!list.isEmpty()) {
+		if (!list.isEmpty()) {
 			Field field = ReflectionUtils.findField(bean.getClass(), fieldName);
 			ReflectionUtils.makeAccessible(field);
 			Object value = getValue(field, list, annotation);
-			if(value!=null) {
+			if (value != null) {
 				ReflectionUtils.setField(field, bean, value);
 			}
 		}
 	}
-	
+
 	Object getValue(Field field, List<Map<String, Object>> list, ValueDb annotation) {
 		Class<?> type = field.getType();
-		if(list.isEmpty()) return null;
+		if (list.isEmpty())
+			return null;
 		if (type.isArray()) {
-			return toArray(getListColumValue(list, annotation),(Class)type.getComponentType());
+			return toArray(getListColumValue(list, annotation), (Class) type.getComponentType());
 		} else if (type.equals(List.class)) {
-			if(field.getGenericType()!=null && ((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0].getTypeName().startsWith(Map.class.getName())) {
+			if (field.getGenericType() != null
+					&& ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0].getTypeName()
+							.startsWith(Map.class.getName())) {
 				return list;
 			} else {
 				return getListColumValue(list, annotation);
@@ -249,7 +261,7 @@ public class ValueDbAnnotationBeanPostProcessor implements BeanPostProcessor, Or
 	}
 
 	public static <T> T[] toArray(Collection<T> list, Class<T> clazz) {
-		final int len = (list==null)? 0 : list.size();
+		final int len = (list == null) ? 0 : list.size();
 		@SuppressWarnings("unchecked")
 		T[] blank = (T[]) Array.newInstance(clazz, len);
 		if (list != null && len > 0) {
@@ -257,23 +269,25 @@ public class ValueDbAnnotationBeanPostProcessor implements BeanPostProcessor, Or
 		}
 		return blank;
 	}
-	
-	List<Object> getListColumValue(List<Map<String, Object>> list, ValueDb annotation){
+
+	List<Object> getListColumValue(List<Map<String, Object>> list, ValueDb annotation) {
 		List<Object> result = new LinkedList<>();
-		for (Map<String, Object> cols : list) {
-			result.add( getOneColumnValue(cols, annotation) );
+		if(list!=null) {
+			for (Map<String, Object> cols : list) {
+				result.add(getOneColumnValue(cols, annotation));
+			}
 		}
 		return result;
 	}
-	
-	Object getOneColumnValue(Map<String, Object> cols, ValueDb annotation){
-		if(!cols.isEmpty()) {
-			if(!NOT_SET.equals(annotation.valueColumnName())) {
+
+	Object getOneColumnValue(Map<String, Object> cols, ValueDb annotation) {
+		if (cols!=null && !cols.isEmpty()) {
+			if (!NOT_SET.equals(annotation.valueColumnName())) {
 				return cols.get(annotation.valueColumnName());
-			}else {
+			} else {
 				int i = 1;
-				for (Object value: cols.values()) {
-					if(i++ == annotation.valueColumnNumber()) {
+				for (Object value : cols.values()) {
+					if (i++ == annotation.valueColumnNumber()) {
 						return value;
 					}
 				}
@@ -282,5 +296,4 @@ public class ValueDbAnnotationBeanPostProcessor implements BeanPostProcessor, Or
 		return null;
 	}
 
-	
 }

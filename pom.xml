@@ -67,7 +67,12 @@
 		</dependency>
 	</dependencies>
 
-<!--
+	 <contributors>
+	    <contributor>
+    		<name>Sharov Sergey</name>
+	    </contributor>
+	</contributors>
+
 	<distributionManagement>
 		<repository>
 			<id>internal.repo</id>
@@ -91,6 +96,7 @@
 					<altDeploymentRepository>internal.repo::default::file://${project.build.directory}/mvn-repo</altDeploymentRepository>
 				</configuration>
 			</plugin>
+<!--
 			<plugin>
 				<groupId>com.github.github</groupId>
 				<artifactId>site-maven-plugin</artifactId>
@@ -115,8 +121,8 @@
 					</execution>
 				</executions>
 			</plugin>
+-->
 		</plugins>
 	</build>
--->
 
 </project>

@@ -1,7 +1,16 @@
-# value-db-autoconfigure-processor
+# Value-db-autoconfigure-processor
 Append to Spring Autowired @ValueDb Annotation
 
-## Example 1.
+Add depepency your project:
+	
+	<dependency>
+		<groupId>ru.sharovse.spring-utils</groupId>
+		<artifactId>value-db-autoconfigure-processor</artifactId>
+		<version>0.0.3</version>
+		<scope>test</scope>
+	</dependency>
+
+## Example 1. Recomended usage annotation @ValueDb.
 
 Java class:
 
@@ -10,10 +19,9 @@ Java class:
 			valueSql="select VALUE from AP_USERSETTING where CODE='SERVICE_ID'")
 	private String dbValue;
 
-	@ValueDb(dataSourceBean=DATASOURCE_NAME,
+	@ValueDb(dataSourceAnnotation=DATASOURCE_NAME,
 			valueSql="select CODE from AP_USERSETTING where CODE='SERVICE_ID'")
 	private String dbCode;
-
 
 application.properties:
 
@@ -22,9 +30,12 @@ application.properties:
 	dev.datasource.username=SA
 	dev.datasource.password=
 
+Created DriverManagerDataSource.
+Execute @ValueDb.valueSql.
+Store value to local variable.
 **Value dbValue is available @Value Spring-EL.**
 
-## Example 2,
+## Example 2. Use exist @Bean DataSource.
 
 @Configuration
 Java Class:
@@ -43,6 +54,9 @@ Java Class:
 
 
 **Value dbValue is not available @Value Spring-EL.**
+Receive application event REFRESH.
+Execute @ValueDb.valueSql with DataSource fuond as symbolic link @ValueDb.dataSourceBean.
+Write value to local variable.
 
 ---
 

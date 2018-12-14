@@ -7,7 +7,6 @@ Add depepency your project:
 		<groupId>ru.sharovse.spring-utils</groupId>
 		<artifactId>value-db-autoconfigure-processor</artifactId>
 		<version>0.0.3</version>
-		<scope>test</scope>
 	</dependency>
 
 ## Example 1. Recomended usage annotation @ValueDb.

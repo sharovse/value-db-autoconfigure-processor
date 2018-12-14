@@ -1,7 +1,16 @@
 # Value-db-autoconfigure-processor
 Append to Spring Autowired @ValueDb Annotation
 
-## Example 1. Recomended usage.
+Add depepency your project:
+	
+	<dependency>
+		<groupId>ru.sharovse.spring-utils</groupId>
+		<artifactId>value-db-autoconfigure-processor</artifactId>
+		<version>0.0.3</version>
+		<scope>test</scope>
+	</dependency>
+
+## Example 1. Recomended usage annotation @ValueDb.
 
 Java class:
 

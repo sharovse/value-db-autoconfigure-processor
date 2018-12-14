@@ -26,19 +26,26 @@ public class StartTestApplication implements CommandLineRunner {
 	@ValueDb(valueSql="select VALUE from AP_USERSETTING where CODE=upper(:name)", dataSourceAnnotation=ValueDbTest.DATASOURCE_NAME)
 	String id;
 
-
 	@ValueDb(valueSql="select CODE from AP_USERSETTING where CODE='ID'", dataSourceAnnotation=ValueDbTest.DATASOURCE_NAME)
 	String code;
 
+	@ValueDb(valueSql="select VALUE from AP_USERSETTING where CODE=upper(:name)", dataSourceBean=ValueDbTest.DATASOURCE_NAME)
+	String beanDataSourceId;
+	
 	public String getId() {
 		return id;
 	}
 	
+	public void setId(String id) {
+		this.id = id;
+	}
+
 	@Override
 	public void run(String... args) throws Exception {
 		System.out.println("@Value="+propertyValue);
 		System.out.println("@ValueDb id="+id);
 		System.out.println("@ValueDb code="+code);
+		System.out.println("@ValueDb beanDataSourceId="+beanDataSourceId);
 	}
 
 	public static void main(String[] args) {

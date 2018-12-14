@@ -13,7 +13,7 @@ public class StoreValues<V> {
 	
 	public V createAndGetValue(String key, StoreValue<V> callBack) {
 		if(!map.containsKey(key)){
-			map.put(key, callBack.createValue(key));
+			map.put(key, callBack.createValue());
 		} 
 		return map.get(key);
 	}

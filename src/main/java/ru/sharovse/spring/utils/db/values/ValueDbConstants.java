@@ -9,6 +9,9 @@ public class ValueDbConstants {
 	public static final String DATASOURCE_PROPERTY_USERNAME ="${username}";
 	public static final String DATASOURCE_PROPERTY_PASSWORD = "${password}";
 	
+	public static final String NOT_SET = ""; 
+	
+	
 	private ValueDbConstants(){
 		super();
 	}

@@ -1,5 +1,7 @@
 package ru.sharovse.spring.utils.db.values;
 
+import static ru.sharovse.spring.utils.db.values.ValueDbConstants.NOT_SET;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -67,7 +69,7 @@ public class ValueDbAnnotationBeanPostProcessor implements BeanPostProcessor, Or
 			}
 		}
 	}
-	static final String ERROR = "";
+	static final String ERROR = NOT_SET;
 	
 	private int order = Ordered.LOWEST_PRECEDENCE;
 	@Override
@@ -81,7 +83,7 @@ public class ValueDbAnnotationBeanPostProcessor implements BeanPostProcessor, Or
 		for (Field field : userClass.getDeclaredFields()) {
 			if (field.isAnnotationPresent(ValueDb.class)) {
 				final ValueDb valueDb = field.getAnnotation(ValueDb.class);
-				if("".equals(valueDb.dataSourceAnnotation())){
+				if(NOT_SET.equals(valueDb.dataSourceAnnotation())){
 					addToValueDbStore(beanName, field.getName(), valueDb);
 				}else{
 					addToInnerValueDbStore(beanName, field.getName(), valueDb);
@@ -137,7 +139,7 @@ public class ValueDbAnnotationBeanPostProcessor implements BeanPostProcessor, Or
 	}
 	
 	NamedParameterJdbcTemplate getTemplateAsBeanName(ApplicationContext context, ValueDb annotation) throws DataSourceNotFoundException {
-		if(!"".equals(annotation.dataSourceAnnotation())){
+		if(!NOT_SET.equals(annotation.dataSourceAnnotation())){
 			return getTemplateAsInnerBeanName(annotation.dataSourceAnnotation()); 
 		}else{
 			return getTemplateAsBeanName(context, annotation.dataSourceBean());
@@ -168,7 +170,7 @@ public class ValueDbAnnotationBeanPostProcessor implements BeanPostProcessor, Or
 			if(dataSourceAnotation.registerToContext()){
 				factoryBean.registerSingleton(dataSourceAnotation.name(), dataSource);
 			}
-			if(!"".equals(dataSourceAnotation.importSql())) {
+			if(!NOT_SET.equals(dataSourceAnotation.importSql())) {
 				importScript(dataSourceAnotation.importSql(), dataSource);
 			}
 		}
@@ -194,7 +196,7 @@ public class ValueDbAnnotationBeanPostProcessor implements BeanPostProcessor, Or
 	String evaluateProperty(String name, String prefix){
 		Matcher m = varPattern.matcher(name);
 		if(m.find()){
-			final String prop = prefix + (prefix.equals("")?"":ValueDbConstants.DOT) + m.group(1);
+			final String prop = prefix + (prefix.equals(NOT_SET)?NOT_SET:ValueDbConstants.DOT) + m.group(1);
 			return  environment.getProperty(prop);
 		}
 		return name;
@@ -235,7 +237,6 @@ public class ValueDbAnnotationBeanPostProcessor implements BeanPostProcessor, Or
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	Object getValue(Field field, List<Map<String, Object>> list, ValueDb annotation) {
 		Class<?> type = field.getType();
 		if(list.isEmpty()) return null;
@@ -275,7 +276,7 @@ public class ValueDbAnnotationBeanPostProcessor implements BeanPostProcessor, Or
 	
 	Object getOneColumnValue(Map<String, Object> cols, ValueDb annotation){
 		if(!cols.isEmpty()) {
-			if(!"".equals(annotation.valueColumnName())) {
+			if(!NOT_SET.equals(annotation.valueColumnName())) {
 				return cols.get(annotation.valueColumnName());
 			}else {
 				int i = 1;

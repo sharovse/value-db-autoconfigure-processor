@@ -48,14 +48,13 @@ Java Class:
 
 ## Annotation @ValueDb acceptable for field type:
 
-	* Object.
+	* Single Object.
 	* Array<Object>.
 	* List<Object>.
 	* Map<Column,Object>.
-	* List<Column,Object>.
+	* List<Map<Column,Object>>.
 
-See example in test file:
-[a relative link]value-db-autoconfigure-processor/src/test/java/ru/sharovse/spring/utils/db/values/test/ValueDbTest.java 
+See example in test file: value-db-autoconfigure-processor/src/test/java/ru/sharovse/spring/utils/db/values/test/ValueDbTest.java 
 
 Example,
 

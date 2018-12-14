@@ -1,19 +1,25 @@
 package ru.sharovse.spring.utils.db.values;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static ru.sharovse.spring.utils.db.values.ValueDbConstants.NOT_SET;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.sql.Connection;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
@@ -22,17 +28,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.support.EncodedResource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.datasource.init.ScriptUtils;
-import org.springframework.util.ReflectionUtils;
 
 import ru.sharovse.spring.utils.db.values.annotations.ValueDb;
 import ru.sharovse.spring.utils.db.values.annotations.ValueDbDataSourceBean;
@@ -165,10 +166,6 @@ public class ValueDbAnnotationBeanPostProcessorTest {
 
 		service.postProcessAfterInitialization(bean, beanName);
 		verify(service).setValueFromDb((ApplicationContext)isNull(), eq(bean), eq(property), eq(valueDb));
-
-		doThrow(new DataSourceNotFoundException()).when(service).setValueFromDb((ApplicationContext)isNull(), eq(bean), eq(property), eq(valueDb));
-		service.postProcessAfterInitialization(bean, beanName);
-
 	}
 
 	@Test(expected=BeanDefinitionStoreException.class)
@@ -182,7 +179,7 @@ public class ValueDbAnnotationBeanPostProcessorTest {
 		doThrow(new DataSourceNotFoundException()).when(service).setValueFromDb((ApplicationContext)isNull(), eq(bean), eq(property), eq(valueDb));
 		service.postProcessAfterInitialization(bean, beanName);
 	}
-
+	
 	@Test(expected=BeanDefinitionStoreException.class)
 	public void testGetTemplateAsBeanNameApplicationContextValueDbException() {
 		doReturn(ValueDbConstants.NOT_SET).when(valueDb).dataSourceAnnotation();

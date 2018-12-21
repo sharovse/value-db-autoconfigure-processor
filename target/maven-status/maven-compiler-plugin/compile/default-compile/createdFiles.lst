@@ -1,0 +1,10 @@
+ru/sharovse/spring/utils/db/values/ValueDbConstants.class
+ru/sharovse/spring/utils/db/values/StoreValue.class
+ru/sharovse/spring/utils/db/values/annotations/ValueDbDriverManagerDataSource.class
+ru/sharovse/spring/utils/db/values/annotations/ValueDbDataSource.class
+ru/sharovse/spring/utils/db/values/StoreValues.class
+ru/sharovse/spring/utils/db/values/ValueDbAutoConfiguration.class
+ru/sharovse/spring/utils/db/values/annotations/ValueDb.class
+ru/sharovse/spring/utils/db/values/ValueDbAnnotationBeanPostProcessor.class
+ru/sharovse/spring/utils/db/values/exceptions/DataSourceNotFoundException.class
+ru/sharovse/spring/utils/db/values/StoreItem.class

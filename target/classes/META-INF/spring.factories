@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+ru.sharovse.spring.utils.db.values.ValueDbAutoConfiguration

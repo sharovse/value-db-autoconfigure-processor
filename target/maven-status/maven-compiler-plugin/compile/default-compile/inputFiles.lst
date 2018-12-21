@@ -1,0 +1,10 @@
+/home/sharov/eclipse-workspace/value-db-autoconfigure-processor/src/main/java/ru/sharovse/spring/utils/db/values/ValueDbAutoConfiguration.java
+/home/sharov/eclipse-workspace/value-db-autoconfigure-processor/src/main/java/ru/sharovse/spring/utils/db/values/annotations/ValueDb.java
+/home/sharov/eclipse-workspace/value-db-autoconfigure-processor/src/main/java/ru/sharovse/spring/utils/db/values/ValueDbAnnotationBeanPostProcessor.java
+/home/sharov/eclipse-workspace/value-db-autoconfigure-processor/src/main/java/ru/sharovse/spring/utils/db/values/StoreValues.java
+/home/sharov/eclipse-workspace/value-db-autoconfigure-processor/src/main/java/ru/sharovse/spring/utils/db/values/annotations/ValueDbDriverManagerDataSource.java
+/home/sharov/eclipse-workspace/value-db-autoconfigure-processor/src/main/java/ru/sharovse/spring/utils/db/values/exceptions/DataSourceNotFoundException.java
+/home/sharov/eclipse-workspace/value-db-autoconfigure-processor/src/main/java/ru/sharovse/spring/utils/db/values/ValueDbConstants.java
+/home/sharov/eclipse-workspace/value-db-autoconfigure-processor/src/main/java/ru/sharovse/spring/utils/db/values/StoreValue.java
+/home/sharov/eclipse-workspace/value-db-autoconfigure-processor/src/main/java/ru/sharovse/spring/utils/db/values/annotations/ValueDbDataSource.java
+/home/sharov/eclipse-workspace/value-db-autoconfigure-processor/src/main/java/ru/sharovse/spring/utils/db/values/StoreItem.java

@@ -7,14 +7,14 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import static ru.sharovse.spring.utils.db.values.ValueDbConstants.*;
 
 /**
- * Read value to field from DB.
+ * Read value to field from DB annotation.
  * 
  * Mandatory properties:
  * <ol>
  * <li> JDBC DataSource for fetching values. 
  * 	<ul>
  * 		<li>{@link #dataSourceBean()} or</li> 
- * 		<li>{@link #dataSourceAnnotation()}</li>
+ * 		<li>{@link #dataSourceAnnotation()} (recommended)</li>
  * 	</ul>
  * </li>
  * <li> {@link #valueSql()} - Script SQL.</li>

@@ -11,13 +11,13 @@ import static ru.sharovse.spring.utils.db.values.ValueDbConstants.*;
  * 
  * Mandatory properties:
  * <ol>
- * <li> JDBC DataSource for fetching values. 
- * 	<ul>
- * 		<li>{@link #dataSourceBean()} or</li> 
- * 		<li>{@link #dataSourceAnnotation()} (recommended)</li>
- * 	</ul>
+ * <li>JDBC DataSource for fetching values.
+ * <ul>
+ * <li>{@link #dataSourceBean()} or</li>
+ * <li>{@link #dataSourceAnnotation()} (recommended)</li>
+ * </ul>
  * </li>
- * <li> {@link #valueSql()} - Script SQL.</li>
+ * <li>{@link #valueSql()} - Script SQL.</li>
  * </ol>
  * 
  * Fetching value strategy:
@@ -27,13 +27,15 @@ import static ru.sharovse.spring.utils.db.values.ValueDbConstants.*;
  * <li>Map columns and values - list rows</li>
  * </ol>
  * 
- * <h2>Single value into single object, array or list<//h2>
- * <p>Property {@link #valueColumnNumber()} or {@link #valueColumnName()} answer on question, what column of RecordSet will fetch. 
- * By default used {@link #valueColumnNumber()}=1. First column.
- * {@link #valueColumnName()} set name column RecordSet and have priority over {@link #valueColumnNumber()}.  
- * </p>
+ * <h2>Single value into single object, array or list</h2>
  * <p>
- * Examble,
+ * Property {@link #valueColumnNumber()} or {@link #valueColumnName()} answer on
+ * question, what column of RecordSet will fetch. By default used
+ * {@link #valueColumnNumber()}=1. First column. {@link #valueColumnName()} set
+ * name column RecordSet and have priority over {@link #valueColumnNumber()}.
+ * </p>
+ * Example,
+ * 
  * <pre>
  * &#64;ValueDb(valueSql = "select VALUE from AP_USERSETTING where CODE='ID'", dataSourceBean = Config.DB_SMFF)
  * private String id;
@@ -48,86 +50,91 @@ import static ru.sharovse.spring.utils.db.values.ValueDbConstants.*;
  * Object[] values;
  * 
  * &#64;ValueDb(valueSql = "select code, value from AP_USERSETTING", dataSourceBean = Config.DB_SMFF, valueColumnName = "VALUE")
- * List<Object> list;
+ * List&lt;Object&gt; list;
  * </pre>
- * </p>
  * 
  * <h2>Map columns and values - one row</h2>
- * <p>First (single) row of RecordSet will write as Map<Column,Object>, where Column is String uppercase name column of RecordSet.</p> 
- * <p>Example.
+ * <p>
+ * First (single) row of RecordSet will write as Map&lt;Column,Object&gt;, where
+ * Column is String uppercase name column of RecordSet.
+ * </p>
+ * Example.
  * 
  * <pre>
-	&#64;ValueDb(valueSql="select * from AP_USERSETTING where CODE='SERVICE_ID'"
-			, dataSourceBean=Config.DB_SMFF)
-	private Map<String, Object> colums;
- * </p>
+ * &#64;ValueDb(valueSql = "select * from AP_USERSETTING where CODE='SERVICE_ID'", dataSourceBean = Config.DB_SMFF)
+ * private Map&lt;String, Object&gt; colums;
+ * </pre>
  * 
  * <h2>Map columns and values - list rows</h2>
  * 
-   <p>List rows of RecorSet fetch into List<Map<Columns, Object>>.</p>
- * <p>Exsample,
+ * <p>
+ * List rows of RecorSet fetch into List&lt;Map&lt;Columns, Object&gt;&gt;.
+ * </p>
+ * Example,
+ * 
  * <pre>
 	&#64;ValueDb(valueSql="select code, value from AP_USERSETTING"
 			, dataSourceBean=Config.DB_SMFF)
-	List<Map<String, Object>> maps; *
+	List&lt;Map&lt;String, Object&gt;&gt; maps; *
  * </pre>
- * </p>
  * 
  * @author sharov1-se
  *
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValueDb {
-	
+
 	/**
 	 * Script SQL for fetching values.
 	 * <p>
 	 * Used DataSource {@link #dataSourceBean()} or {@link #dataSourceAnnotation()}.
-	 * This is {@link NamedParameterJdbcTemplate} with one argument - name field. 
-	 * Default name argument watch in {@link #argContextName()} (name).  
+	 * This is {@link NamedParameterJdbcTemplate} with one argument - name field.
+	 * Default name argument watch in {@link #argPropertyName()}.
 	 * </p>
-	 * <p>
-	 * Пример:
+	 * Example
+	 * 
 	 * <pre>
 	 * select VALUE from AP_USERSETTING where CODE=upper(:<b>name</b>)
 	 * </pre>
-	 * </p>
-	 * @return
+	 * 
+	 * @return filename
 	 */
 	String valueSql();
 
 	/**
-	 * Set symbolic link onto bean DataSource. 
-	 * Fetched value is not available in @Value Spring-EL.
-	 * Otherwise use {@link #dataSourceAnnotation()}. 
+	 * Set symbolic link onto bean DataSource. Fetched value is not available
+	 * in @Value Spring-EL. Otherwise use {@link #dataSourceAnnotation()}.
 	 * 
 	 * @return DataSource link to bean name.
 	 */
 	String dataSourceBean() default NOT_SET;
 
 	/**
-	 * Set symbolic link onto name embedded Datasource created annotation {@link ValueDbDriverManagerDataSource}.
-	 * @return DataSource link to name annotation {@link ValueDbDriverManagerDataSource}).
+	 * Set symbolic link onto name embedded Datasource created annotation
+	 * {@link ValueDbDriverManagerDataSource}.
+	 * 
+	 * @return DataSource link to name annotation
+	 *         {@link ValueDbDriverManagerDataSource}).
 	 */
 	String dataSourceAnnotation() default NOT_SET;
 
 	/**
-	 * Set name argument in {@link #valueSql()}.
-	 * Default "name". Example ":name". 
+	 * Set name argument in {@link #valueSql()}. Default "name". Example ":name".
+	 * 
 	 * @return name argument with name annotited property.
 	 */
 	String argPropertyName() default "name";
 
 	/**
-	 * Number column that will fetch from RecortSet.
-	 * Default 1 - first column.
+	 * Number column that will fetch from RecortSet. Default 1 - first column.
+	 * 
 	 * @return number.
 	 */
 	int valueColumnNumber() default 1;
 
 	/**
-	 * Name column RecorSet.
-	 * This property overwrite {@link #valueColumnNumber()}.
+	 * Name column RecorSet. This property overwrite {@link #valueColumnNumber()}.
+	 * 
 	 * @return characters.
 	 */
 	String valueColumnName() default NOT_SET;

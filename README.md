@@ -13,7 +13,7 @@ Add depepency your project:
 
 Java class:
 
-	@ValueDbDataSourceBean(name=DATASOURCE_NAME, propertyPrefix="dev.datasource")
+	@ValueDbDataSource(name=DATASOURCE_NAME, propertyPrefix="dev.datasource")
 	@ValueDb(dataSourceAnnotation=DATASOURCE_NAME,
 			valueSql="select VALUE from AP_USERSETTING where CODE='SERVICE_ID'")
 	private String dbValue;

@@ -14,7 +14,7 @@
 	<description>Autowired value from db</description>
 	<packaging>jar</packaging>
 
-	<version>0.0.5-SNAPSHOT</version>
+	<version>0.0.5</version>
 
 	<name>value-db</name>
 	<url>https://github.com/sharovse/value-db-autoconfigure-processor</url>

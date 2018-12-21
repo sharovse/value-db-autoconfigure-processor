@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 
 import ru.sharovse.spring.utils.db.values.annotations.ValueDb;
-import ru.sharovse.spring.utils.db.values.annotations.ValueDbDataSourceBean;
+import ru.sharovse.spring.utils.db.values.annotations.ValueDbDriverManagerDataSource;
 
 @SpringBootApplication
 @EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
@@ -18,7 +18,7 @@ public class StartTestApplication implements CommandLineRunner {
 	@Value("${dev.datasource.driverClassName}")
 	String propertyValue;
 
-	@ValueDbDataSourceBean(
+	@ValueDbDriverManagerDataSource(
 			name=ValueDbTest.DATASOURCE_NAME, 
 			propertyPrefix="dev.datasource", 
 			registerToContext=true, 

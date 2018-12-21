@@ -106,8 +106,8 @@ public @interface ValueDb {
 	String dataSourceBean() default NOT_SET;
 
 	/**
-	 * Set symbolic link onto name embedded Datasource created annotation {@link ValueDbDataSourceBean}.
-	 * @return DataSource link to name annotation {@link ValueDbDataSourceBean}).
+	 * Set symbolic link onto name embedded Datasource created annotation {@link ValueDbDriverManagerDataSource}.
+	 * @return DataSource link to name annotation {@link ValueDbDriverManagerDataSource}).
 	 */
 	String dataSourceAnnotation() default NOT_SET;
 

@@ -36,7 +36,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import ru.sharovse.spring.utils.db.values.annotations.ValueDb;
-import ru.sharovse.spring.utils.db.values.annotations.ValueDbDataSourceBean;
+import ru.sharovse.spring.utils.db.values.annotations.ValueDbDriverManagerDataSource;
 import ru.sharovse.spring.utils.db.values.exceptions.DataSourceNotFoundException;
 import ru.sharovse.spring.utils.db.values.test.StartTestApplication;
 
@@ -105,25 +105,25 @@ public class ValueDbAnnotationBeanPostProcessorTest {
 		doNothing().when(service).addToValueDbStore(eq(beanName), eq("beanDataSourceId"), any(ValueDb.class));
 		doNothing().when(service).addToInnerValueDbStore(eq(beanName), eq("code"), any(ValueDb.class));
 		doNothing().when(service).addToInnerValueDbStore(eq(beanName), eq("id"), any(ValueDb.class));
-		doNothing().when(service).addToValueDbDataSourceStore(any(ValueDbDataSourceBean.class));
+		doNothing().when(service).addToValueDbDataSourceStore(any(ValueDbDriverManagerDataSource.class));
 		
 		service.postProcessBeforeInitialization(bean, beanName);
 		
 		verify(service,times(1)).addToValueDbStore(eq(beanName), eq("beanDataSourceId"), any(ValueDb.class));
 		verify(service,times(1)).addToInnerValueDbStore(eq(beanName), eq("code"), any(ValueDb.class));
 		verify(service,times(1)).addToInnerValueDbStore(eq(beanName), eq("id"), any(ValueDb.class));
-		verify(service,times(1)).addToValueDbDataSourceStore(any(ValueDbDataSourceBean.class));
+		verify(service,times(1)).addToValueDbDataSourceStore(any(ValueDbDriverManagerDataSource.class));
 	}
 	
 	@Mock
-	ValueDbDataSourceBean valueDbDataSourceBean;
+	ValueDbDriverManagerDataSource valueDbDataSourceBean;
 	
 	
 	@Test
 	public void testAddToValueDbDataSourceStore() {
 		doReturn(key).when(valueDbDataSourceBean).name();
 		service.addToValueDbDataSourceStore(valueDbDataSourceBean);
-		assertEquals(valueDbDataSourceBean, service.storeAnnonatedDataSource.get(key));
+		assertEquals(valueDbDataSourceBean, service.storeDriverManagerAnnonatedDataSource.get(key));
 	}
 
 	String property = "id";

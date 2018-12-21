@@ -3,13 +3,15 @@ package ru.sharovse.spring.utils.db.values.annotations;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+
 import static ru.sharovse.spring.utils.db.values.ValueDbConstants.*;
 
-/** DataSource Annotation for {@link ValueDb}.
+/** Simple {@link DriverManagerDataSource} Annotation for {@link ValueDb}.
  * @author sharov1-se
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValueDbDataSourceBean {
+public @interface ValueDbDriverManagerDataSource {
 	
 	/** Name bean for symbolic link {@link ValueDb#dataSourceAnnotation()}.
 	 * If {@link #registerToContext()}=true, DataSource bean will register into spring applicationContext by this name.

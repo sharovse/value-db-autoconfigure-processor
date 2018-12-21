@@ -9,16 +9,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import ru.sharovse.spring.utils.db.values.annotations.ValueDb;
-import ru.sharovse.spring.utils.db.values.annotations.ValueDbDataSourceBean;
+import ru.sharovse.spring.utils.db.values.annotations.ValueDbDataSource;
+import ru.sharovse.spring.utils.db.values.annotations.ValueDbDriverManagerDataSource;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class ValueDbTest {
 
 	public static final String DATASOURCE_NAME = "DS";
+	public static final String DATASOURCE_NAME1 = "DS2";
 	
 	@Value("${dev.datasource.driverClassName}")
 	String propertyValue;
@@ -37,7 +40,7 @@ public class ValueDbTest {
 		assertEquals("org.hsqldb.jdbcDriver", propertyValue);
 	}
 
-	@ValueDbDataSourceBean(
+	@ValueDbDriverManagerDataSource(
 			name=DATASOURCE_NAME, 
 			propertyPrefix="dev.datasource", 
 			registerToContext=true, 
@@ -162,4 +165,14 @@ public class ValueDbTest {
 
 	}
 
+	@ValueDbDataSource(className="org.springframework.jdbc.datasource.DriverManagerDataSource",
+			name=DATASOURCE_NAME1, propertyPrefix="dev.datasource")
+	@ValueDb(valueSql="select VALUE from AP_USERSETTING where CODE='SERVICE_ID'", dataSourceAnnotation=DATASOURCE_NAME1)
+	String dbServiceIdValue2;
+
+	@Test
+	public void testDbServiceIdValue2() {
+		assertEquals(propServiceIdValue, dbServiceIdValue2);
+	}
+	
 }

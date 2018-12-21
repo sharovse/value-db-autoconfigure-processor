@@ -37,7 +37,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import ru.sharovse.spring.utils.db.values.annotations.ValueDb;
-import ru.sharovse.spring.utils.db.values.annotations.ValueDbDataSourceBean;
+import ru.sharovse.spring.utils.db.values.annotations.ValueDbDataSource;
+import ru.sharovse.spring.utils.db.values.annotations.ValueDbDriverManagerDataSource;
 import ru.sharovse.spring.utils.db.values.exceptions.DataSourceNotFoundException;
 
 public class ValueDbAnnotationBeanPostProcessor
@@ -85,28 +86,35 @@ public class ValueDbAnnotationBeanPostProcessor
 					addToInnerValueDbStore(beanName, field.getName(), valueDb);
 				}
 			}
-			if (field.isAnnotationPresent(ValueDbDataSourceBean.class)) {
-				addToValueDbDataSourceStore(field.getAnnotation(ValueDbDataSourceBean.class));
+			if (field.isAnnotationPresent(ValueDbDriverManagerDataSource.class)) {
+				addToValueDbDataSourceStore(field.getAnnotation(ValueDbDriverManagerDataSource.class));
 			}
+			if (field.isAnnotationPresent(ValueDbDataSource.class)) {
+				addToValueDbDataSourceStore(field.getAnnotation(ValueDbDataSource.class));
+			}
+
 		}
 		return bean;
 	}
 
-	StoreValues<ValueDbDataSourceBean> storeAnnonatedDataSource = new StoreValues<>();
-
-	void addToValueDbDataSourceStore(ValueDbDataSourceBean annotation) {
-		StoreValue<ValueDbDataSourceBean> createValue = () -> annotation;
+	StoreValues<ValueDbDataSource> storeAnnonatedDataSource = new StoreValues<>();
+	void addToValueDbDataSourceStore(ValueDbDataSource annotation) {
+		StoreValue<ValueDbDataSource> createValue = () -> annotation;
 		storeAnnonatedDataSource.createAndGetValue(annotation.name(), createValue);
+	}
+	
+	StoreValues<ValueDbDriverManagerDataSource> storeDriverManagerAnnonatedDataSource = new StoreValues<>();
+	void addToValueDbDataSourceStore(ValueDbDriverManagerDataSource annotation) {
+		StoreValue<ValueDbDriverManagerDataSource> createValue = () -> annotation;
+		storeDriverManagerAnnonatedDataSource.createAndGetValue(annotation.name(), createValue);
 	}
 
 	StoreValues<Map<String, ValueDb>> storeAnnonatedInnerFields = new StoreValues<>();
-
 	void addToInnerValueDbStore(String beanName, String name, ValueDb annotation) {
 		addToValueDbStore(beanName, name, annotation, storeAnnonatedInnerFields);
 	}
 
 	StoreValues<Map<String, ValueDb>> storeAnnonatedFields = new StoreValues<>();
-
 	void addToValueDbStore(String beanName, String name, ValueDb annotation) {
 		addToValueDbStore(beanName, name, annotation, storeAnnonatedFields);
 	}
@@ -153,7 +161,7 @@ public class ValueDbAnnotationBeanPostProcessor
 
 	StoreValues<DataSource> storeDataSource = new StoreValues<>();
 
-	private DataSource createInnerDataSource(ValueDbDataSourceBean dataSourceAnotation) {
+	private DataSource createInnerDataSource(ValueDbDriverManagerDataSource dataSourceAnotation) {
 		StoreValue<DataSource> createValue = () -> {
 			DriverManagerDataSource dataSource = new DriverManagerDataSource();
 			dataSource.setDriverClassName(
@@ -170,10 +178,55 @@ public class ValueDbAnnotationBeanPostProcessor
 			}
 			return dataSource;
 		};
-
 		return storeDataSource.createAndGetValue(dataSourceAnotation.name(), createValue);
 	}
 
+	private DataSource createInnerDataSource(ValueDbDataSource dataSourceAnotation) {
+		StoreValue<DataSource> createValue = () -> {
+			
+			DataSource dataSource = createDataSourceFromClass(dataSourceAnotation);
+			
+			if (dataSourceAnotation.registerToContext()) {
+				factoryBean.registerSingleton(dataSourceAnotation.name(), dataSource);
+			}
+			if (!NOT_SET.equals(dataSourceAnotation.importSql())) {
+				importScript(dataSourceAnotation.importSql(), dataSource);
+			}
+			return dataSource;
+		};
+		return storeDataSource.createAndGetValue(dataSourceAnotation.name(), createValue);
+	}
+
+	private DataSource createDataSourceFromClass(ValueDbDataSource dataSourceAnotation) {
+		try {
+			Class<?> clazz = Class.forName(dataSourceAnotation.className());
+			Object dataSource = clazz.newInstance();
+			for (Field field : getFields(clazz)) {
+				String value = evaluateProperty("${"+field.getName()+"}", dataSourceAnotation.propertyPrefix());
+				if(value!=null) {
+					boolean access = field.isAccessible();
+					field.setAccessible(true);
+					field.set(dataSource, value);
+					field.setAccessible(access);
+				}
+			} 
+			return (DataSource)	dataSource;
+		} catch (Exception e) {
+			throw new BeanDefinitionStoreException("create DataSource from "+dataSourceAnotation.className()+" error ",e);
+		}
+	}
+	
+	List<Field> getFields(Class<?> clazz){
+		List<Field> list = new LinkedList<>();
+		while(clazz!=null) {
+			for (Field field : clazz.getDeclaredFields()) {
+				list.add(field);
+			}
+			clazz = clazz.getSuperclass();
+		}
+		return list;
+	}
+	
 	void importScript(String fileSql, DataSource dataSource) {
 		try (Connection connection = dataSource.getConnection()) {
 			ScriptUtils.executeSqlScript(connection, new EncodedResource(new ClassPathResource(fileSql)), false, false,
@@ -205,11 +258,19 @@ public class ValueDbAnnotationBeanPostProcessor
 
 	NamedParameterJdbcTemplate getTemplateAsInnerBeanName(String dataSourceAnnotation) {
 		final String key = INNER_PREFIX + dataSourceAnnotation;
-		StoreValue<NamedParameterJdbcTemplate> createValue = () -> {
-			ValueDbDataSourceBean dataSourceAnotation = storeAnnonatedDataSource.get(dataSourceAnnotation);
-			return new NamedParameterJdbcTemplate(createInnerDataSource(dataSourceAnotation));
-		};
-		return storeTemplates.createAndGetValue(key, createValue);
+		if(storeDriverManagerAnnonatedDataSource.isContainKey(dataSourceAnnotation)){
+			StoreValue<NamedParameterJdbcTemplate> createValue = () -> {
+				ValueDbDriverManagerDataSource dataSourceAnotation = storeDriverManagerAnnonatedDataSource.get(dataSourceAnnotation);
+				return new NamedParameterJdbcTemplate(createInnerDataSource(dataSourceAnotation));
+			};
+			return storeTemplates.createAndGetValue(key, createValue);
+		}else {
+			StoreValue<NamedParameterJdbcTemplate> createValue = () -> {
+				ValueDbDataSource dataSourceAnotation = storeAnnonatedDataSource.get(dataSourceAnnotation);
+				return new NamedParameterJdbcTemplate(createInnerDataSource(dataSourceAnotation));
+			};
+			return storeTemplates.createAndGetValue(key, createValue);
+		}
 	}
 
 	public static final String BEAN_PREFIX = "bean.";
